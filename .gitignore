@@ -1,0 +1,37 @@
+# Dependencies
+node_modules/
+
+# Environment variables — co the chua mat khau / secret, tuyet doi khong commit.
+# .env.* bao gom ca .env.local, .env.development, .env.production...
+# !.env.example giu lai file mau (chi ten bien + gia tri mau, khong co bi mat).
+.env
+.env.*
+!.env.example
+!.env.template
+
+# Build
+dist/
+build/
+
+# Logs
+*.log
+npm-debug.log*
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test coverage
+coverage/
+
+# Playwright output
+frontend/playwright-report/
+frontend/test-results/
+
+# Temporary files
+tmp/
+temp/

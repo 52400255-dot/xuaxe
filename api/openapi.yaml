@@ -1,0 +1,1239 @@
+openapi: 3.1.0
+info:
+  title: Automotive Repair Workshop Management API
+  description: >
+    REST API cho hệ thống quản lý gara sửa chữa ô tô.
+    Luồng chính: Tiếp nhận xe → Chẩn đoán → Báo giá → Duyệt → Sửa chữa (trừ kho phụ tùng)
+    → Hoàn thành → Hóa đơn → Thanh toán.
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000/api/v1
+    description: Local development
+
+tags:
+  - name: Auth
+  - name: Customers
+  - name: Vehicles
+  - name: RepairJobs
+  - name: SpareParts
+  - name: Estimates
+  - name: Invoices
+  - name: Users
+
+paths:
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Đăng nhập, nhận JWT token
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string, format: password }
+      responses:
+        '200':
+          description: Đăng nhập thành công, trả về token + thông tin user
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: object
+                    properties:
+                      token: { type: string }
+                      user: { $ref: '#/components/schemas/User' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /auth/me:
+    get:
+      tags: [Auth]
+      summary: Lấy thông tin người dùng hiện tại
+      operationId: getMe
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Thông tin user
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/User' }
+
+  /customers:
+    get:
+      tags: [Customers]
+      summary: Danh sách khách hàng
+      operationId: listCustomers
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Customer' }
+    post:
+      tags: [Customers]
+      summary: Tạo khách hàng mới (receptionist/admin)
+      operationId: createCustomer
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CustomerInput' }
+      responses:
+        '201': { description: Đã tạo khách hàng }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /customers/{id}:
+    parameters:
+      - { $ref: '#/components/parameters/IdPath' }
+    get:
+      tags: [Customers]
+      summary: Chi tiết khách hàng
+      operationId: getCustomer
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: Khách hàng trong data của response success }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [Customers]
+      summary: Cập nhật các trường được gửi (receptionist/admin)
+      operationId: updateCustomer
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CustomerUpdate' }
+      responses:
+        '200': { description: Khách hàng sau cập nhật trong data }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+    delete:
+      tags: [Customers]
+      summary: Xóa khách hàng (admin)
+      operationId: deleteCustomer
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: success và message xác nhận đã xóa }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /customers/{id}/vehicles:
+    get:
+      tags: [Customers]
+      summary: Danh sách xe của một khách hàng
+      operationId: getCustomerVehicles
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: '#/components/parameters/IdPath' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Vehicle' }
+
+  /vehicles:
+    get:
+      tags: [Vehicles]
+      summary: Danh sách xe, có thể tìm kiếm (US03 — chọn phương tiện)
+      operationId: listVehicles
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: query
+          name: search
+          description: Từ khóa khớp (ILIKE) biển số, hãng xe, dòng xe hoặc tên khách hàng
+          schema: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Vehicle' }
+    post:
+      tags: [Vehicles]
+      summary: Tạo xe (receptionist/admin)
+      operationId: createVehicle
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/VehicleInput' }
+      responses:
+        '201': { description: Xe mới trong data của response success }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /vehicles/{id}:
+    parameters:
+      - { $ref: '#/components/parameters/IdPath' }
+    get:
+      tags: [Vehicles]
+      summary: Chi tiết xe
+      operationId: getVehicle
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: Xe trong data của response success }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [Vehicles]
+      summary: Cập nhật các trường được gửi (receptionist/admin)
+      operationId: updateVehicle
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/VehicleUpdate' }
+      responses:
+        '200': { description: Xe sau cập nhật trong data }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+    delete:
+      tags: [Vehicles]
+      summary: Xóa xe (admin)
+      operationId: deleteVehicle
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: success và message xác nhận đã xóa }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /vehicles/receive:
+    post:
+      tags: [RepairJobs]
+      summary: Alias tiếp nhận xe của POST /repair-jobs (receptionist)
+      operationId: receiveVehicle
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ReceptionInput' }
+      responses:
+        '201': { description: Phiếu mới pending trong data, cùng hành vi POST /repair-jobs }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /vehicles/{id}/receive:
+    post:
+      tags: [RepairJobs]
+      summary: Tiếp nhận xe theo ID trên URL (receptionist)
+      description: Dùng chung validation và service với POST /repair-jobs; ID trên URL thay vehicleId trong body.
+      operationId: receiveVehicleById
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: '#/components/parameters/IdPath' }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ReceptionDetails' }
+      responses:
+        '201': { description: Phiếu mới pending trong data }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /vehicles/{id}/repair-history:
+    get:
+      tags: [Vehicles]
+      summary: Lịch sử sửa chữa của xe (US03)
+      description: >
+        Lễ tân, quản lý dịch vụ và admin xem được lịch sử của mọi xe;
+        khách hàng chỉ xem được xe thuộc hồ sơ của mình; role khác bị từ chối.
+      operationId: getVehicleRepairHistory
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: '#/components/parameters/IdPath' }
+      responses:
+        '200':
+          description: Danh sách phiếu sửa chữa của đúng xe này, mới nhất trước
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/RepairJob' }
+        '400':
+          description: id không phải số nguyên dương
+        '401':
+          description: Thiếu hoặc sai token
+        '403':
+          description: Role không được xem lịch sử, hoặc khách hàng không sở hữu xe này
+        '404':
+          description: Xe không tồn tại
+
+  /repair-jobs:
+    get:
+      tags: [RepairJobs]
+      summary: Danh sách phiếu sửa chữa (lọc theo status)
+      operationId: listRepairJobs
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: query
+          name: status
+          schema: { $ref: '#/components/schemas/JobStatus' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/RepairJob' }
+    post:
+      tags: [RepairJobs]
+      summary: Lễ tân tiếp nhận xe, tạo phiếu sửa (US04, US05)
+      description: >
+        customerRequest bắt buộc là chuỗi có nội dung sau trim. serviceItems có thể bỏ qua hoặc là mảng rỗng.
+        Một phần tử dịch vụ sai làm từ chối toàn bộ yêu cầu; không bỏ qua phần tử lỗi hoặc đổi quantity=0 thành 1.
+        Xe/dịch vụ không tồn tại trả 404. Stored function tạo phiếu và dịch vụ nguyên tử, không để phiếu dở dang.
+        Router /repairs là alias hiện hữu của /repair-jobs, dùng chung validation và service.
+      operationId: createRepairJob
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ReceptionInput' }
+      responses:
+        '201':
+          description: Phiếu sửa đã tạo (status = pending)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/RepairJob' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /repair-jobs/{id}:
+    get:
+      tags: [RepairJobs]
+      summary: Chi tiết phiếu, thợ phụ trách và chẩn đoán mới nhất
+      description: >
+        Thợ phụ trách lấy theo assigned_at DESC, id DESC; chẩn đoán lấy theo diagnosed_at DESC, id DESC.
+        Các bản ghi cũ vẫn được giữ làm lịch sử.
+      operationId: getRepairJob
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: '#/components/parameters/IdPath' }
+      responses:
+        '200': { description: Phiếu trong data của response success }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /repair-jobs/my-jobs:
+    get:
+      tags: [RepairJobs]
+      summary: Việc của thợ máy đang đăng nhập (hỗ trợ US06–07)
+      description: >
+        Chỉ trả phiếu có bản phân công mới nhất thuộc thợ đăng nhập (assigned_at DESC, id DESC).
+        Thợ cũ không còn thấy phiếu sau phân công lại. Mỗi phiếu xuất hiện một lần, kèm chẩn đoán mới nhất.
+      operationId: getMyJobs
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/RepairJob' }
+
+  /repair-jobs/mechanics:
+    get:
+      tags: [RepairJobs]
+      summary: Lấy danh sách kỹ thuật viên để phân công (US07)
+      operationId: getMechanicsList
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Danh sách kỹ thuật viên
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: integer, format: int64 }
+                        full_name: { type: string }
+                        email: { type: string }
+
+  /repair-jobs/{id}/assign:
+    put:
+      tags: [RepairJobs]
+      summary: Phân công thợ máy (US07)
+      description: >
+        Lễ tân hoặc quản lý dịch vụ phân công/phân công lại khi phiếu pending hoặc diagnosing.
+        mechanicId phải trỏ đến người dùng có role mechanic. Gán lại thợ hiện tại trả bản phân công hiện tại, không ghi trùng.
+        Phân công đầu tiên chuyển pending sang diagnosing; phân công lại giữ diagnosing.
+        Bản mới nhất theo assigned_at DESC, id DESC là thợ phụ trách; bản cũ giữ làm lịch sử.
+        Kiểm tra và ghi dưới khóa hàng phiếu trong một transaction.
+      operationId: assignMechanic
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: '#/components/parameters/IdPath' }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [mechanicId]
+              properties:
+                mechanicId: { $ref: '#/components/schemas/PositiveId' }
+      responses:
+        '200': { description: Bản phân công trong data; phiếu đang diagnosing }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /repair-jobs/assign:
+    put:
+      tags: [RepairJobs]
+      summary: Alias phân công với repairJobId trong body
+      description: Dùng chung validation và service với PUT /repair-jobs/{id}/assign. Cũng chấp nhận repair_job_id hoặc jobId thay repairJobId.
+      operationId: assignMechanicByBody
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [mechanicId]
+              anyOf:
+                - required: [repairJobId]
+                - required: [repair_job_id]
+                - required: [jobId]
+              properties:
+                repairJobId: { $ref: '#/components/schemas/PositiveId' }
+                repair_job_id: { $ref: '#/components/schemas/PositiveId' }
+                jobId: { $ref: '#/components/schemas/PositiveId' }
+                mechanicId: { $ref: '#/components/schemas/PositiveId' }
+      responses:
+        '200': { description: Bản phân công trong data }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /repair-jobs/{id}/diagnosis:
+    put:
+      tags: [RepairJobs]
+      summary: Thợ máy ghi nhận chẩn đoán (US06)
+      description: >
+        Chỉ thợ đang phụ trách được ghi khi phiếu diagnosing. Khóa hàng phiếu trong transaction trước khi kiểm tra và ghi.
+        Mỗi lần lưu tạo một bản lịch sử, giữ nguyên trạng thái diagnosing; hiển thị bản mới nhất theo diagnosed_at DESC, id DESC.
+      operationId: saveDiagnosis
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: '#/components/parameters/IdPath' }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [diagnosisResult]
+              properties:
+                diagnosisResult: { type: string, minLength: 1, pattern: '\S' }
+                repairSuggestion: { type: [string, 'null'] }
+      responses:
+        '201': { description: Đã lưu chẩn đoán }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /repair-jobs/{id}/status:
+    put:
+      tags: [RepairJobs]
+      summary: Cập nhật trạng thái phiếu sửa (endpoint hiện hữu)
+      description: >
+        Lễ tân/quản lý dịch vụ có quyền cập nhật; thợ phải là thợ đang phụ trách.
+        Chuỗi chuyển hợp lệ là pending → diagnosing → estimated → approved → in_repair → completed;
+        mọi trạng thái chưa kết thúc có thể chuyển cancelled. Gửi lại cùng trạng thái hợp lệ không tạo thay đổi.
+        Kiểm tra và cập nhật dưới khóa hàng phiếu; completed và cancelled không được chuyển sang trạng thái khác.
+      operationId: updateJobStatus
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: '#/components/parameters/IdPath' }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status: { $ref: '#/components/schemas/JobStatus' }
+      responses:
+        '200': { description: Đã cập nhật }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /spare-parts:
+    get:
+      tags: [SpareParts]
+      summary: Danh sách phụ tùng trong kho (US10)
+      operationId: listSpareParts
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/SparePart' }
+    post:
+      tags: [SpareParts]
+      summary: Thêm phụ tùng mới (warehouse_staff/admin)
+      operationId: createSparePart
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SparePartInput' }
+      responses:
+        '201': { description: Đã tạo }
+
+  /spare-parts/low-stock:
+    get:
+      tags: [SpareParts]
+      summary: Cảnh báo phụ tùng dưới ngưỡng tồn (US12)
+      operationId: listLowStockParts
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/SparePart' }
+
+  /spare-parts/{id}/deduct:
+    post:
+      tags: [SpareParts]
+      summary: Trừ kho khi thợ ghi nhận phụ tùng đã dùng (US11)
+      operationId: deductSparePart
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: '#/components/parameters/IdPath' }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [repairJobId, quantity]
+              properties:
+                repairJobId: { type: integer, format: int64 }
+                quantity: { type: number, exclusiveMinimum: 0 }
+      responses:
+        '201': { description: Đã trừ kho + ghi nhận vào phiếu }
+        '409': { description: Kho không đủ số lượng }
+
+  /spare-parts/{id}/import:
+    post:
+      tags: [SpareParts]
+      summary: Nhập kho phụ tùng
+      operationId: importSparePart
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: '#/components/parameters/IdPath' }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [quantity]
+              properties:
+                quantity: { type: number, exclusiveMinimum: 0 }
+      responses:
+        '200': { description: Đã nhập kho }
+
+  /estimates:
+    post:
+      tags: [Estimates]
+      summary: Tạo báo giá cho phiếu sửa (US13, US14)
+      operationId: createEstimate
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [repairJobId, items]
+              properties:
+                repairJobId: { type: integer, format: int64 }
+                items:
+                  type: array
+                  minItems: 1
+                  items:
+                    type: object
+                    required: [itemType, description, quantity, unitPrice]
+                    properties:
+                      itemType: { type: string, enum: [labor, part, other] }
+                      description: { type: string }
+                      quantity: { type: number }
+                      unitPrice: { type: number }
+      responses:
+        '201':
+          description: Báo giá đã tạo, tổng tiền tự tính
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/Estimate' }
+
+  /estimates/{id}/approve:
+    put:
+      tags: [Estimates]
+      summary: Khách đồng ý báo giá → phiếu chuyển approved
+      operationId: approveEstimate
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: '#/components/parameters/IdPath' }
+      responses:
+        '200': { description: Đã duyệt }
+        '404': { description: Báo giá không tồn tại hoặc đã xử lý }
+
+  /estimates/{id}/reject:
+    put:
+      tags: [Estimates]
+      summary: Khách từ chối báo giá → phiếu cancelled
+      operationId: rejectEstimate
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: '#/components/parameters/IdPath' }
+      responses:
+        '200': { description: Đã từ chối }
+
+  /invoices:
+    post:
+      tags: [Invoices]
+      summary: Xuất hóa đơn cho phiếu đã hoàn thành (US15)
+      operationId: createInvoice
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [repairJobId]
+              properties:
+                repairJobId: { type: integer, format: int64 }
+      responses:
+        '201':
+          description: Hóa đơn gồm nhân công + phụ tùng + VAT 10%
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/Invoice' }
+        '409': { description: Phiếu chưa hoàn thành hoặc đã có hóa đơn }
+
+  /invoices/{id}/pay:
+    put:
+      tags: [Invoices]
+      summary: Ghi nhận thanh toán hóa đơn
+      operationId: payInvoice
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: '#/components/parameters/IdPath' }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                amount: { type: number }
+                paymentMethod: { type: string, enum: [cash, bank_transfer, card] }
+      responses:
+        '200': { description: Đã thanh toán }
+
+  /services:
+    get:
+      tags: [Services]
+      summary: Lấy danh mục dịch vụ sửa chữa chuẩn
+      operationId: listServices
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Danh mục dịch vụ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: integer, format: int64 }
+                        service_code: { type: string }
+                        service_name: { type: string }
+                        description: { type: string }
+                        standard_price: { type: number }
+
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Đăng ký tài khoản công khai (luôn tạo role customer)
+      description: >
+        Endpoint công khai, không cần token. Chỉ đọc fullName, email, password; mọi trường role
+        trong body đều bị bỏ qua và tài khoản mới luôn có role customer. Muốn đổi role phải dùng
+        PATCH /users/{id}/role (chỉ admin).
+      operationId: register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [fullName, email, password]
+              properties:
+                fullName: { type: string }
+                email: { type: string, format: email }
+                password: { type: string, format: password }
+      responses:
+        '201':
+          description: Tài khoản mới, role luôn là customer, không có password_hash
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, const: true }
+                  data: { $ref: '#/components/schemas/UserPublic' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /users:
+    get:
+      tags: [Users]
+      summary: Danh sách người dùng (chỉ admin, US17)
+      operationId: listUsers
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Danh sách người dùng sắp theo id tăng dần. Không bao giờ có password_hash.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, const: true }
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/UserPublic' }
+              example:
+                success: true
+                data:
+                  - id: '9'
+                    full_name: Le Thi Ngoc
+                    email: ngoc.warehouse@workshop.vn
+                    role: warehouse_staff
+                    created_at: '2026-10-21T11:19:40.983Z'
+                  - id: '10'
+                    full_name: Admin He Thong
+                    email: admin@workshop.vn
+                    role: admin
+                    created_at: '2026-10-21T11:19:40.983Z'
+        '401':
+          description: Thiếu token xác thực, hoặc token sai định dạng
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+              examples:
+                thieuToken:
+                  summary: Không gửi header Authorization
+                  value:
+                    success: false
+                    message: Không tìm thấy token xác thực (Access token required)
+                tokenKhongHopLe:
+                  summary: Token sai định dạng
+                  value:
+                    success: false
+                    message: Token không hợp lệ (Invalid or malformed token)
+        '403':
+          description: Người gọi không phải admin
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+              example:
+                success: false
+                message: "Bạn không có quyền truy cập (Role 'warehouse_staff' is not authorized). Cần một trong: admin"
+
+  /users/{id}/role:
+    patch:
+      tags: [Users]
+      summary: Đổi vai trò của người dùng (chỉ admin, US17)
+      description: >
+        Người không phải admin luôn nhận 403, kể cả khi id hoặc body sai (quyền được kiểm tra trước).
+        Đổi sang đúng role hiện tại vẫn trả 200 cùng bản ghi người dùng.
+        Middleware đọc role hiện tại từ PostgreSQL ở mỗi request nên role mới có hiệu lực với JWT đã cấp.
+        Tài khoản đã xóa không thể tiếp tục dùng token cũ. Đăng ký công khai luôn tạo role customer;
+        chỉ admin mới có thể đổi role qua endpoint này.
+      operationId: updateUserRole
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: '#/components/parameters/IdPath' }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [role]
+              properties:
+                role: { $ref: '#/components/schemas/UserRole' }
+            example:
+              role: mechanic
+      responses:
+        '200':
+          description: Người dùng sau khi đổi role. Không có password_hash.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, const: true }
+                  data: { $ref: '#/components/schemas/UserPublic' }
+              example:
+                success: true
+                data:
+                  id: '11'
+                  full_name: Test Role US17
+                  email: us17.101853@example.com
+                  role: mechanic
+                  created_at: '2026-10-31T03:19:14.507Z'
+        '400':
+          description: id không phải số nguyên dương, thiếu hoặc sai kiểu role, hoặc role không thuộc danh sách cho phép
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+              examples:
+                idKhongHopLe:
+                  summary: id không phải số nguyên dương
+                  value:
+                    success: false
+                    message: "Tham số 'id' không hợp lệ (phải là số nguyên dương)"
+                    errors:
+                      - field: id
+                        message: "'id' phải là số nguyên dương, nhận được 'abc'"
+                thieuRole:
+                  summary: Thiếu role (hoặc không gửi body)
+                  value:
+                    success: false
+                    message: Dữ liệu không hợp lệ (Validation failed)
+                    errors:
+                      - field: role
+                        message: "'role' là bắt buộc (required)"
+                saiKieuRole:
+                  summary: role không phải chuỗi
+                  value:
+                    success: false
+                    message: Dữ liệu không hợp lệ (Validation failed)
+                    errors:
+                      - field: role
+                        message: "'role' phải có kiểu 'string', nhận được 'number'"
+                roleKhongHopLe:
+                  summary: role ngoài danh sách cho phép (không có trường errors)
+                  value:
+                    success: false
+                    message: "Vai trò không hợp lệ. Chỉ chấp nhận: customer, receptionist, service_manager, mechanic, warehouse_staff, admin"
+        '401':
+          description: Thiếu token xác thực, hoặc token sai định dạng
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+              examples:
+                thieuToken:
+                  summary: Không gửi header Authorization
+                  value:
+                    success: false
+                    message: Không tìm thấy token xác thực (Access token required)
+                tokenKhongHopLe:
+                  summary: Token sai định dạng
+                  value:
+                    success: false
+                    message: Token không hợp lệ (Invalid or malformed token)
+        '403':
+          description: Người gọi không phải admin
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+              example:
+                success: false
+                message: "Bạn không có quyền truy cập (Role 'warehouse_staff' is not authorized). Cần một trong: admin"
+        '404':
+          description: Không tìm thấy người dùng với id này
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+              example:
+                success: false
+                message: Không tìm thấy người dùng
+        '409':
+          description: Không thể tự hạ quyền admin hoặc hạ quyền admin cuối cùng
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+              examples:
+                selfDemotion:
+                  summary: Admin không thể tự hạ quyền
+                  value:
+                    success: false
+                    message: Không thể tự hạ quyền quản trị của chính mình
+                lastAdmin:
+                  summary: Không thể hạ quyền admin cuối cùng
+                  value:
+                    success: false
+                    message: Không thể hạ quyền quản trị viên cuối cùng
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    IdPath:
+      in: path
+      name: id
+      required: true
+      schema: { type: integer, minimum: 1, maximum: 9007199254740991 }
+
+  responses:
+    BadRequest:
+      description: Sai kiểu, thiếu trường bắt buộc, chuỗi trắng, ID/số lượng ngoài giới hạn hoặc người nhận phân công không phải thợ
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    NotFound:
+      description: Đối tượng hoặc dữ liệu được tham chiếu không tồn tại
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Conflict:
+      description: Trùng dữ liệu, xóa đối tượng đang được tham chiếu hoặc trạng thái không cho phép thao tác
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Unauthorized:
+      description: Chưa đăng nhập / token hết hạn
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Forbidden:
+      description: Sai phân quyền (RBAC) hoặc thợ không phải người đang phụ trách phiếu
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+
+  schemas:
+    PositiveId:
+      description: Số nguyên dương an toàn (1–9007199254740991); chấp nhận cả chuỗi chỉ chứa chữ số có giá trị trong cùng giới hạn.
+      oneOf:
+        - { type: integer, minimum: 1, maximum: 9007199254740991 }
+        - { type: string, pattern: '^0*[1-9][0-9]*$' }
+
+    ReceptionDetails:
+      type: object
+      required: [customerRequest]
+      properties:
+        customerRequest: { type: string, minLength: 1, pattern: '\S' }
+        serviceItems:
+          type: array
+          description: >
+            Bỏ qua tương đương mảng rỗng; null hoặc kiểu khác bị từ chối. Chấp nhận ID đơn hoặc object.
+            Object cũng chấp nhận service_id hoặc id thay serviceId. quantity mặc định 1 chỉ khi không được gửi;
+            nếu gửi thì phải chuyển thành số hữu hạn lớn hơn 0, tối đa 9999999999.99. Chuỗi số được chấp nhận.
+          items:
+            oneOf:
+              - { $ref: '#/components/schemas/PositiveId' }
+              - type: object
+                anyOf:
+                  - required: [serviceId]
+                  - required: [service_id]
+                  - required: [id]
+                properties:
+                  serviceId: { $ref: '#/components/schemas/PositiveId' }
+                  service_id: { $ref: '#/components/schemas/PositiveId' }
+                  id: { $ref: '#/components/schemas/PositiveId' }
+                  quantity:
+                    default: 1
+                    oneOf:
+                      - { type: number, exclusiveMinimum: 0, maximum: 9999999999.99 }
+                      - { type: string, description: Chuỗi biểu diễn số hữu hạn trong cùng giới hạn }
+
+    ReceptionInput:
+      allOf:
+        - { $ref: '#/components/schemas/ReceptionDetails' }
+        - type: object
+          required: [vehicleId]
+          properties:
+            vehicleId: { $ref: '#/components/schemas/PositiveId' }
+
+    Error:
+      type: object
+      properties:
+        success: { type: boolean, const: false }
+        message: { type: string }
+        errors:
+          type: array
+          description: Chi tiết lỗi từng trường. Chỉ có ở lỗi kiểm tra dữ liệu đầu vào, có thể vắng mặt.
+          items:
+            type: object
+            properties:
+              field: { type: string }
+              message: { type: string }
+
+    User:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        fullName: { type: string }
+        email: { type: string, format: email }
+        role:
+          type: string
+          enum: [customer, receptionist, service_manager, mechanic, warehouse_staff, admin]
+
+    Customer:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        user_id: { type: [integer, 'null'], format: int64 }
+        full_name: { type: string }
+        phone: { type: string }
+        email: { type: [string, 'null'], format: email }
+
+    CustomerInput:
+      type: object
+      required: [fullName, phone]
+      description: Chuỗi được trim trước khi lưu; fullName và phone không được trắng. email nếu gửi phải là chuỗi có nội dung hoặc null.
+      properties:
+        userId:
+          anyOf:
+            - { $ref: '#/components/schemas/PositiveId' }
+            - { type: 'null' }
+        fullName: { type: string, minLength: 1, maxLength: 150, pattern: '\S' }
+        phone: { type: string, minLength: 1, maxLength: 20, pattern: '\S' }
+        email: { type: [string, 'null'], minLength: 1, maxLength: 255, pattern: '\S' }
+
+    CustomerUpdate:
+      type: object
+      description: Chỉ cập nhật trường được gửi; email null giữ nguyên giá trị hiện hữu. Không thay liên kết userId.
+      properties:
+        fullName: { type: string, minLength: 1, maxLength: 150, pattern: '\S' }
+        phone: { type: string, minLength: 1, maxLength: 20, pattern: '\S' }
+        email: { type: [string, 'null'], minLength: 1, maxLength: 255, pattern: '\S' }
+
+    VehicleInput:
+      allOf:
+        - { $ref: '#/components/schemas/VehicleUpdate' }
+        - type: object
+          required: [customerId, licensePlate, brand, model]
+          properties:
+            customerId: { $ref: '#/components/schemas/PositiveId' }
+
+    VehicleUpdate:
+      type: object
+      description: Chuỗi được trim; chỉ cập nhật trường được gửi. manufactureYear null giữ nguyên giá trị hiện hữu. Không đổi customerId.
+      properties:
+        licensePlate: { type: string, minLength: 1, maxLength: 20, pattern: '\S' }
+        brand: { type: string, minLength: 1, maxLength: 100, pattern: '\S' }
+        model: { type: string, minLength: 1, maxLength: 100, pattern: '\S' }
+        manufactureYear: { type: [integer, 'null'], minimum: 1, maximum: 9999 }
+
+    Vehicle:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        customer_id: { type: integer, format: int64 }
+        license_plate: { type: string, examples: ['51A-12345'] }
+        brand: { type: string, examples: ['Toyota'] }
+        model: { type: string, examples: ['Vios'] }
+        manufacture_year: { type: [integer, 'null'] }
+
+    JobStatus:
+      type: string
+      enum: [pending, diagnosing, estimated, approved, in_repair, completed, cancelled]
+
+    RepairJob:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        vehicle_id: { type: integer, format: int64 }
+        receptionist_id: { type: integer, format: int64 }
+        customer_request: { type: [string, 'null'] }
+        status: { $ref: '#/components/schemas/JobStatus' }
+        received_at: { type: string, format: date-time }
+        completed_at: { type: [string, 'null'], format: date-time }
+        license_plate: { type: string }
+        customer_name: { type: string }
+        mechanic_id: { type: [integer, 'null'], format: int64 }
+        mechanic_name: { type: [string, 'null'] }
+        diagnosis_result: { type: [string, 'null'] }
+        repair_suggestion: { type: [string, 'null'] }
+        diagnosed_at: { type: [string, 'null'], format: date-time }
+
+    SparePart:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        partCode: { type: string, examples: ['OIL-FLT-001'] }
+        partName: { type: string, examples: ['Lọc nhớt'] }
+        unit: { type: string, examples: ['piece'] }
+        stockQuantity: { type: number }
+        unitPrice: { type: number }
+        minStock: { type: number }
+
+    SparePartInput:
+      type: object
+      required: [partCode, partName, unitPrice]
+      properties:
+        partCode: { type: string }
+        partName: { type: string }
+        unit: { type: string }
+        stockQuantity: { type: number }
+        unitPrice: { type: number }
+        minStock: { type: number }
+
+    Estimate:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        repairJobId: { type: integer, format: int64 }
+        status: { type: string, enum: [draft, sent, approved, rejected] }
+        totalAmount: { type: number }
+        createdAt: { type: string, format: date-time }
+        approvedAt: { type: [string, 'null'], format: date-time }
+        details:
+          type: array
+          items:
+            type: object
+            properties:
+              itemType: { type: string, enum: [labor, part, other] }
+              description: { type: string }
+              quantity: { type: number }
+              unitPrice: { type: number }
+
+    Invoice:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        repairJobId: { type: integer, format: int64 }
+        estimateId: { type: [integer, 'null'], format: int64 }
+        status: { type: string, enum: [draft, issued, paid, cancelled] }
+        totalAmount: { type: number }
+        issuedAt: { type: string, format: date-time }
+        details:
+          type: array
+          items:
+            type: object
+            properties:
+              description: { type: string }
+              quantity: { type: number }
+              unitPrice: { type: number }
+
+    UserRole:
+      type: string
+      description: Phải khớp ràng buộc CHECK của cột users.role trong database.
+      enum: [customer, receptionist, service_manager, mechanic, warehouse_staff, admin]
+
+    UserPublic:
+      type: object
+      description: Thông tin công khai của người dùng. Không bao giờ chứa password_hash.
+      required: [id, full_name, email, role, created_at]
+      properties:
+        id:
+          type: string
+          pattern: '^[0-9]+$'
+          description: BIGINT của PostgreSQL, API trả về dạng chuỗi (ví dụ "11").
+          examples: ['11']
+        full_name: { type: string }
+        email: { type: string, format: email }
+        role: { $ref: '#/components/schemas/UserRole' }
+        created_at: { type: string, format: date-time }

@@ -1,0 +1,149 @@
+/**
+ * customer.controller — CRUD khách hàng (API tầng REST)
+ */
+const customerService = require('../services/customer.service');
+
+async function list(req, res, next) {
+  try {
+    const customers = await customerService.findAll();
+    res.json({ success: true, data: customers });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function getMine(req, res, next) {
+  try {
+    const customer = await customerService.findByUserId(req.user.id);
+    if (!customer) {
+      return res.status(404).json({ success: false, message: 'Tài khoản chưa được liên kết với hồ sơ khách hàng' });
+    }
+    res.json({ success: true, data: customer });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function getMyVehicles(req, res, next) {
+  try {
+    const customer = await customerService.findByUserId(req.user.id);
+    if (!customer) {
+      return res.status(404).json({ success: false, message: 'Tài khoản chưa được liên kết với hồ sơ khách hàng' });
+    }
+    const vehicles = await customerService.getVehicles(customer.id);
+    res.json({ success: true, data: vehicles });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function getById(req, res, next) {
+  try {
+    const customer = await customerService.findById(req.params.id);
+
+    if (!customer) {
+      return res.status(404).json({
+        success: false,
+        message: 'Không tìm thấy khách hàng',
+      });
+    }
+
+    res.json({ success: true, data: customer });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function create(req, res, next) {
+  try {
+    const {
+      userId,
+      fullName,
+      phone,
+      email,
+      address,
+    } = req.body;
+
+    const created = await customerService.create({
+      userId,
+      fullName,
+      phone,
+      email,
+      address,
+    });
+
+    res.status(201).json({
+      success: true,
+      data: created,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function update(req, res, next) {
+  try {
+    const updated = await customerService.update(
+      req.params.id,
+      req.body
+    );
+
+    if (!updated) {
+      return res.status(404).json({
+        success: false,
+        message: 'Không tìm thấy khách hàng',
+      });
+    }
+
+    res.json({
+      success: true,
+      data: updated,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function remove(req, res, next) {
+  try {
+    const deleted = await customerService.remove(req.params.id);
+
+    if (!deleted) {
+      return res.status(404).json({
+        success: false,
+        message: 'Không tìm thấy khách hàng',
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Đã xóa khách hàng',
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function getVehicles(req, res, next) {
+  try {
+    const vehicles = await customerService.getVehicles(req.params.id);
+
+    res.json({
+      success: true,
+      data: vehicles,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+module.exports = {
+  list,
+  getMine,
+  getMyVehicles,
+  getById,
+  create,
+  update,
+  remove,
+  getVehicles,
+};

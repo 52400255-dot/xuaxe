@@ -85,8 +85,15 @@ export default function LoginPage() {
             <li>
               <span className="workflow-number">03</span>
               <span className="workflow-copy">
-                <strong>Sửa chữa & bàn giao</strong>
-                <small>Theo dõi phụ tùng, tiến độ và thanh toán</small>
+                <strong>Sửa chữa</strong>
+                <small>Theo dõi phụ tùng và tiến độ từng phiếu</small>
+              </span>
+            </li>
+            <li>
+              <span className="workflow-number">04</span>
+              <span className="workflow-copy">
+                <strong>Bàn giao</strong>
+                <small>Hoàn tất phiếu và thanh toán</small>
               </span>
             </li>
           </ol>

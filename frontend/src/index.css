@@ -34,13 +34,13 @@
   --space-10: 40px;
   --space-12: 48px;
   --space-16: 64px;
-  --font-size-mono: 11px;
-  --font-size-caption: 12px;
-  --font-size-body: 14px;
+  --font-size-mono: 13px;
+  --font-size-caption: 13px;
+  --font-size-body: 15px;
   --font-size-body-large: 16px;
   --font-size-supporting: 17px;
   --font-size-subtitle: 18px;
-  --font-size-compact: 13px;
+  --font-size-compact: 14px;
   --font-size-title: 20px;
   --font-size-section: 24px;
   --font-size-page: clamp(32px, 3vw, 40px);
@@ -48,7 +48,7 @@
   --font-size-hero: clamp(40px, 4vw, 52px);
   --font-body: 'IBM Plex Sans', sans-serif;
   --font-display: var(--font-body);
-  --font-mono: 'IBM Plex Mono', monospace;
+  --font-mono: var(--font-body);
   --sidebar-width: 240px;
   --radius: 12px;
   --radius-card: 20px;
@@ -1117,4 +1117,125 @@ tbody tr:hover td {
     padding: 20px;
     border-radius: 18px;
   }
+}
+
+/* Consistent, calm typography and more room for long content */
+body {
+  font-size: var(--font-size-body);
+  line-height: 1.6;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-body);
+  letter-spacing: -.018em;
+}
+
+h1, h2 {
+  font-weight: 600;
+}
+
+h3, h4 {
+  font-weight: 600;
+}
+
+.eyebrow, .panel-kicker, .sidebar-section-label, .sidebar-group-label,
+.topbar-context span, .job-number, .job-detail-label, .stat-label,
+.repair-jobs-live, .task-board-live, .task-metric-card > span,
+.repair-overview-cards small, .portal-vehicle-label, .summary-label,
+.demo-tag, .role-pill, .badge, .reception-required-mark, .service-count {
+  font-family: var(--font-body);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.eyebrow, .panel-kicker, .job-detail-label, .stat-label,
+.task-metric-card > span, .repair-overview-cards small {
+  font-size: var(--font-size-caption);
+  font-weight: 500;
+}
+
+.sidebar-section-label, .sidebar-group-label, .topbar-context span,
+.job-number, .repair-jobs-live, .task-board-live, .portal-vehicle-label,
+.summary-label, .demo-tag, .role-pill, .service-count {
+  font-size: var(--font-size-caption);
+  font-weight: 500;
+}
+
+label, .form-group label, .reception-main-panel .reception-form-group > label {
+  font-weight: 500;
+}
+
+.card p, .legacy-panel p {
+  line-height: 1.65;
+}
+
+th, td {
+  line-height: 1.6;
+}
+
+th {
+  font-family: var(--font-body);
+  font-size: var(--font-size-compact);
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+th, td {
+  padding: 14px 16px;
+}
+
+.job-request-cell {
+  min-width: 230px;
+  max-width: 360px;
+  color: var(--text-secondary);
+  vertical-align: middle;
+}
+
+.job-request-copy {
+  display: block;
+  max-width: 42ch;
+  line-height: 1.65;
+}
+
+.repair-queue-table .job-request-cell {
+  min-width: 270px;
+  max-width: 360px;
+}
+
+.job-detail-block {
+  margin-top: 16px;
+  padding: 16px 18px;
+  background: #f8f6f1;
+  border: 0;
+  border-radius: 16px;
+}
+
+.job-detail-label {
+  margin-bottom: 8px;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.job-detail-block p {
+  max-width: 68ch;
+  font-size: var(--font-size-body-large);
+  line-height: 1.7;
+}
+
+.job-detail-block p + p {
+  margin-top: 12px;
+}
+
+.job-card-header {
+  margin-bottom: 18px;
+}
+
+.job-card-identity > p {
+  line-height: 1.65;
+}
+
+.job-actions {
+  gap: 10px;
+  margin-top: 18px;
 }

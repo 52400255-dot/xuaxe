@@ -181,7 +181,7 @@ export default function StatusPortalPage() {
                   {(histories[v.id] || []).map((j) => (
                     <tr key={j.id}>
                     <td><RepairOrderCode id={j.id} /></td>
-                    <td>{j.customer_request}</td>
+                    <td className="job-request-cell"><span className="job-request-copy">{j.customer_request}</span></td>
                     <td className="portal-work-status"><StatusBadge status={j.status} /><WorkshopProgress status={j.status} compact /></td>
                       <td>{new Date(j.received_at).toLocaleString('vi-VN')}</td>
                       <td>{j.completed_at ? new Date(j.completed_at).toLocaleString('vi-VN') : '—'}</td>

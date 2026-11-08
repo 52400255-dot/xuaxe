@@ -196,7 +196,7 @@ export default function RepairJobsPage() {
                     <div className="table-secondary">{j.brand} {j.model}</div>
                   </td>
                   <td>{j.customer_name || '—'}</td>
-                  <td className="job-request-cell">{j.customer_request || 'Không có mô tả'}</td>
+                  <td className="job-request-cell"><span className="job-request-copy">{j.customer_request || 'Không có mô tả'}</span></td>
                   <td>{j.mechanic_name ? <span className="assigned-mechanic">{j.mechanic_name}</span> : <span className="unassigned-mechanic">Chưa phân công</span>}</td>
                   <td><StatusBadge status={j.status} /></td>
                   <td>

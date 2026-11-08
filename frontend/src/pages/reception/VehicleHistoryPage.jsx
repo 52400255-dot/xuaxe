@@ -167,7 +167,7 @@ export default function VehicleHistoryPage() {
                     <td><RepairOrderCode id={j.id} /></td>
                     <td><StatusBadge status={j.status} /></td>
                     <td className="job-request-cell">
-                      {j.customer_request || '—'}
+                      <span className="job-request-copy">{j.customer_request || '—'}</span>
                     </td>
                     <td>{joinItems(j.services)}</td>
                     <td>{joinItems(j.parts, true)}</td>

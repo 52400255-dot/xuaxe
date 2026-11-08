@@ -6,13 +6,14 @@ import { Link } from 'react-router-dom';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import StatusBadge from '../components/common/StatusBadge';
+import Plate from '../components/common/Plate';
+import RepairOrderCode from '../components/common/RepairOrderCode';
 
 export default function DashboardPage() {
   const { user } = useAuth();
   const [jobs, setJobs] = useState([]);
   const [lowStock, setLowStock] = useState([]);
   const [error, setError] = useState('');
-  const [today] = useState(() => new Date());
 
   useEffect(() => {
     // Chỉ gọi danh sách tất cả phiếu nếu có quyền
@@ -41,47 +42,55 @@ export default function DashboardPage() {
     <div className="dashboard-page">
       <div className="page-header dashboard-heading">
         <div>
-          <p className="eyebrow">Tổng quan xưởng</p>
+          <p className="eyebrow">TỔNG QUAN XƯỞNG</p>
           <h1>Chào mừng trở lại{firstName ? ', ' + firstName : ''}</h1>
-          <p>Tình hình công việc và những việc cần ưu tiên hôm nay.</p>
+          <p>Cùng xem tình hình công việc và những việc cần ưu tiên hôm nay.</p>
         </div>
-        <div className="dashboard-heading-aside">
-          <time className="shift-date" dateTime={today.toISOString()}>
-            {today.toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })}
-          </time>
-          {user?.role === 'receptionist' && <Link className="btn btn-primary" to="/reception">Tiếp nhận xe</Link>}
-        </div>
+        {user?.role === 'receptionist' && <Link className="btn btn-primary" to="/reception">＋ Tiếp nhận xe</Link>}
       </div>
       {error && <div className="alert alert-error" role="alert">{error}</div>}
 
-      <section className="ops-strip" aria-label="Chỉ số vận hành">
-        <div className="ops-cell" data-tone="charcoal">
-          <span className="ops-label">Phiếu trong phạm vi</span>
-          <strong className="ops-value">{canViewJobs ? jobs.length : '—'}</strong>
-          <span className="ops-note">{canViewJobs ? active.length + ' phiếu đang hoạt động' : 'Không có quyền xem danh sách phiếu'}</span>
+      <section className="dashboard-welcome">
+        <div className="dashboard-welcome-copy">
+          <span className="dashboard-welcome-kicker">GARAGE WORKSHOP</span>
+          <h2>Mọi thứ đang vào guồng.</h2>
+          <p>Theo dõi tiến độ sửa chữa, điều phối công việc và chuẩn bị vật tư tại một nơi.</p>
         </div>
-        <div className="ops-cell" data-tone="steel">
-          <span className="ops-label">Chờ tiếp nhận</span>
-          <strong className="ops-value">{canViewJobs ? waiting : '—'}</strong>
-          <span className="ops-note">Cần được xử lý tiếp theo</span>
-        </div>
-        <div className="ops-cell" data-tone="orange">
-          <span className="ops-label">Đang thực hiện</span>
-          <strong className="ops-value">{canViewJobs ? inProgress : '—'}</strong>
-          <span className="ops-note">Chẩn đoán, duyệt và sửa chữa</span>
-        </div>
-        <div className="ops-cell" data-tone={canViewStock && lowStock.length > 0 ? 'red' : 'green'}>
-          <span className="ops-label">{canViewStock ? 'Phụ tùng sắp hết' : 'Đã hoàn thành'}</span>
-          <strong className="ops-value">{canViewStock ? lowStock.length : canViewJobs ? completed : '—'}</strong>
-          <span className="ops-note">{canViewStock ? 'Cần kiểm tra tồn kho' : 'Phiếu đã kết thúc sửa chữa'}</span>
-        </div>
+        <div className="dashboard-welcome-mark" aria-hidden="true"><span>G</span></div>
       </section>
+
+      <div className="dashboard-stats dashboard-stats-four">
+        <article className="stat-card stat-card-forest">
+          <span className="stat-icon" aria-hidden="true">▤</span>
+          <span className="stat-label">Phiếu trong phạm vi</span>
+          <strong className="stat-value">{canViewJobs ? jobs.length : '—'}</strong>
+          <span className="stat-footnote">{canViewJobs ? active.length + ' phiếu đang hoạt động' : 'Không có quyền xem danh sách phiếu'}</span>
+        </article>
+        <article className="stat-card stat-card-sand">
+          <span className="stat-icon" aria-hidden="true">◷</span>
+          <span className="stat-label">Chờ tiếp nhận</span>
+          <strong className="stat-value">{canViewJobs ? waiting : '—'}</strong>
+          <span className="stat-footnote">Cần được xử lý tiếp theo</span>
+        </article>
+        <article className="stat-card stat-card-blue">
+          <span className="stat-icon" aria-hidden="true">⚙</span>
+          <span className="stat-label">Đang thực hiện</span>
+          <strong className="stat-value">{canViewJobs ? inProgress : '—'}</strong>
+          <span className="stat-footnote">Chẩn đoán, duyệt và sửa chữa</span>
+        </article>
+        <article className="stat-card stat-card-green">
+          <span className="stat-icon" aria-hidden="true">✓</span>
+          <span className="stat-label">{canViewStock ? 'Phụ tùng sắp hết' : 'Đã hoàn thành'}</span>
+          <strong className="stat-value">{canViewStock ? lowStock.length : canViewJobs ? completed : '—'}</strong>
+          <span className="stat-footnote">{canViewStock ? 'Cần kiểm tra tồn kho' : 'Phiếu đã kết thúc sửa chữa'}</span>
+        </article>
+      </div>
 
       <div className="dashboard-content-grid">
         <section className="card dashboard-table-card">
           <div className="card-heading dashboard-card-heading">
             <div>
-              <p className="eyebrow">Cập nhật mới nhất</p>
+              <p className="eyebrow">CẬP NHẬT MỚI NHẤT</p>
               <h2 className="dashboard-section-title">Phiếu sửa chữa gần đây</h2>
               <p className="dashboard-section-note">Theo dõi các xe đang được tiếp nhận tại xưởng.</p>
             </div>
@@ -96,8 +105,8 @@ export default function DashboardPage() {
                 {jobs.slice(0, 6).map((j) => (
                   <tr key={j.id}>
                     <td>
-                      <span className="ro-code">RO-{String(j.id).padStart(5, '0')}</span>
-                      <div className="table-secondary"><span className="plate">{j.license_plate}</span>{j.brand || j.model ? ' ' + (j.brand || '') + ' ' + (j.model || '') : ''}</div>
+                      <div className="repair-row-identity"><RepairOrderCode id={j.id} /><Plate value={j.license_plate} /></div>
+                      <div className="table-secondary">{[j.brand, j.model].filter(Boolean).join(' ')}</div>
                     </td>
                     <td>{j.customer_name || '—'}</td>
                     <td><StatusBadge status={j.status} /></td>
@@ -113,50 +122,39 @@ export default function DashboardPage() {
         <aside className="dashboard-side-stack">
           <section className="card dashboard-progress-card">
             <div className="dashboard-side-heading">
-              <div><p className="eyebrow">Tình trạng hiện tại</p><h2>Tiến độ xưởng</h2></div>
+              <div><p className="eyebrow">TÌNH TRẠNG HIỆN TẠI</p><h2>Tiến độ xưởng</h2></div>
+              <span className="dashboard-side-icon" aria-hidden="true">↗</span>
             </div>
-            <div className="dashboard-side-body">
-              <div className="progress-summary"><strong>{canViewJobs ? completed + ' / ' + jobs.length : '—'}</strong><span>phiếu đã hoàn thành</span></div>
-              <div className="dashboard-progress-track" role="img" aria-label={`Chờ tiếp nhận ${waiting}, đang thực hiện ${inProgress}, đã hoàn thành ${completed} trên tổng ${jobs.length} phiếu`}>
-                {canViewJobs && jobs.length > 0 && (
-                  <>
-                    <span className="seg-done" style={{ width: (completed / progressTotal * 100) + '%' }} />
-                    <span className="seg-working" style={{ width: (inProgress / progressTotal * 100) + '%' }} />
-                    <span className="seg-waiting" style={{ width: (waiting / progressTotal * 100) + '%' }} />
-                  </>
-                )}
-              </div>
-              <div className="dashboard-status-list">
-                <div><span><i className="status-dot dot-waiting" />Chờ tiếp nhận</span><strong>{canViewJobs ? waiting : '—'}</strong></div>
-                <div><span><i className="status-dot dot-working" />Đang thực hiện</span><strong>{canViewJobs ? inProgress : '—'}</strong></div>
-                <div><span><i className="status-dot dot-done" />Đã hoàn thành</span><strong>{canViewJobs ? completed : '—'}</strong></div>
-              </div>
+            <div className="progress-summary"><strong>{canViewJobs ? completed + ' / ' + jobs.length : '—'}</strong><span>phiếu đã hoàn thành</span></div>
+            <div className="dashboard-progress-track" role="progressbar" aria-label="Tỷ lệ phiếu đã hoàn thành" aria-valuemin="0" aria-valuemax="100" aria-valuenow={canViewJobs && jobs.length ? Math.round(completed / jobs.length * 100) : 0}>
+              <span style={{ width: (canViewJobs ? Math.round(completed / progressTotal * 100) : 0) + '%' }} />
+            </div>
+            <div className="dashboard-status-list">
+              <div><span><i className="status-dot dot-waiting" />Chờ tiếp nhận</span><strong>{canViewJobs ? waiting : '—'}</strong></div>
+              <div><span><i className="status-dot dot-working" />Đang thực hiện</span><strong>{canViewJobs ? inProgress : '—'}</strong></div>
+              <div><span><i className="status-dot dot-done" />Đã hoàn thành</span><strong>{canViewJobs ? completed : '—'}</strong></div>
             </div>
           </section>
 
           <section className="card dashboard-stock-card">
             <div className="dashboard-side-heading">
-              <div><p className="eyebrow">Kho phụ tùng</p><h2>Cần chú ý</h2></div>
-              <span className="stock-count" data-alert={canViewStock && lowStock.length > 0}>{canViewStock ? lowStock.length : '—'}</span>
+              <div><p className="eyebrow">KHO PHỤ TÙNG</p><h2>Cần chú ý</h2></div>
+              <span className="stock-count">{canViewStock ? lowStock.length : '—'}</span>
             </div>
-            <div className="dashboard-side-body">
-              {canViewStock && lowStock.length > 0 ? (
-                <ul className="dashboard-stock-list">
-                  {lowStock.slice(0, 4).map((part) => (
-                    <li key={part.id}>
-                      <span>
-                        <strong>{part.part_name || part.name || part.part_code || 'Phụ tùng'}</strong>
-                        <small>{part.part_code || part.sku || 'Tồn kho thấp'}</small>
-                      </span>
-                      <b>{part.stock_quantity ?? part.quantity_in_stock ?? part.quantity ?? '—'}</b>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="dashboard-stock-note">{canViewStock ? 'Kho chưa có phụ tùng cần cảnh báo.' : 'Thông tin tồn kho chưa được tải cho vai trò này.'}</p>
-              )}
-              {canViewStock && <Link className="text-link dashboard-stock-link" to="/inventory">Mở kho phụ tùng <span aria-hidden="true">→</span></Link>}
-            </div>
+            {canViewStock && lowStock.length > 0 ? (
+              <ul className="dashboard-stock-list">
+                {lowStock.slice(0, 3).map((part) => (
+                  <li key={part.id}>
+                    <span className="dashboard-part-mark" aria-hidden="true">⌁</span>
+                    <span><strong>{part.part_name || part.name || part.part_code || 'Phụ tùng'}</strong><small>{part.part_code || part.sku || 'Tồn kho thấp'}</small></span>
+                    <b>{part.stock_quantity ?? part.quantity_in_stock ?? part.quantity ?? '—'}</b>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="dashboard-stock-note">{canViewStock ? 'Kho chưa có phụ tùng cần cảnh báo.' : 'Thông tin tồn kho chưa được tải cho vai trò này.'}</p>
+            )}
+            {canViewStock && <Link className="text-link dashboard-stock-link" to="/inventory">Mở kho phụ tùng <span aria-hidden="true">→</span></Link>}
           </section>
         </aside>
       </div>

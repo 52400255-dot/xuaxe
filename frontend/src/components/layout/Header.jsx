@@ -22,6 +22,7 @@ const PAGE_LABELS = {
   '/inventory': 'Kho phụ tùng',
   '/customers': 'Khách hàng',
   '/vehicles': 'Quản lý xe',
+  '/admin/roles': 'Vai trò & phân quyền',
   '/portal': 'Theo dõi sửa chữa',
 };
 
@@ -45,7 +46,7 @@ export default function Header() {
   return (
     <header className="app-topbar">
       <div className="topbar-context">
-        <span>Garage Workshop · Không gian làm việc</span>
+        <span>Garage Workshop</span>
         <strong>{PAGE_LABELS[pathname] || 'Trung tâm dịch vụ'}</strong>
       </div>
       {user && (

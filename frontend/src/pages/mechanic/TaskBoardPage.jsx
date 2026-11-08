@@ -289,7 +289,7 @@ export default function TaskBoardPage() {
               <div className="job-card-header">
                 <div className="job-card-identity">
                   <span className="job-number">Phiếu #{j.id}</span>
-                  <h2>{j.license_plate} <span>{j.brand} {j.model}</span></h2>
+                  <h2><span className="plate">{j.license_plate}</span><span>{j.brand} {j.model}</span></h2>
                   <p>Khách hàng: <strong>{j.customer_name}</strong>{j.customer_phone ? ` · ${j.customer_phone}` : ''}</p>
                 </div>
                 <StatusBadge status={j.status} />

@@ -119,7 +119,11 @@ export default function Sidebar({ isOpen = false, onNavigate }) {
             <strong title={user.fullName || user.email}>{user.fullName || user.email}</strong>
             <span>{ROLE_LABELS[user.role] || user.role}</span>
           </div>
-          <button type="button" className="btn btn-outline sidebar-logout" onClick={handleLogout}>
+          <button type="button" className="btn btn-outline sidebar-logout" onClick={handleLogout} aria-label="Đăng xuất">
+            <svg className="sidebar-logout-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M10 17l5-5-5-5M15 12H3" />
+              <path d="M12 3h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7" />
+            </svg>
             <span>Đăng xuất</span>
           </button>
         </div>

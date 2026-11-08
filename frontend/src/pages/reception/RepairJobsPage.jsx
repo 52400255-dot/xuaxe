@@ -188,7 +188,7 @@ export default function RepairJobsPage() {
             <tbody>
               {visibleJobs.map((j) => (
                 <tr key={j.id}>
-                  <td><span className="ro-code">RO-{String(j.id).padStart(5, '0')}</span><div className="table-secondary"><span className="plate">{j.license_plate}</span> {j.brand} {j.model}</div></td>
+                  <td><strong>#{j.id}</strong><div className="table-secondary"><b>{j.license_plate}</b> · {j.brand} {j.model}</div></td>
                   <td>{j.customer_name || '—'}</td>
                   <td className="job-request-cell">{j.customer_request || 'Không có mô tả'}</td>
                   <td>{j.mechanic_name ? <span className="assigned-mechanic">{j.mechanic_name}</span> : <span className="unassigned-mechanic">Chưa phân công</span>}</td>

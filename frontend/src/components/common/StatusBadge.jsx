@@ -4,14 +4,14 @@
 const STATUS_MAP = {
   pending: { label: 'Chờ xử lý', cls: 'badge-pending' },
   diagnosing: { label: 'Đang chẩn đoán', cls: 'badge-progress' },
-  estimated: { label: 'Chờ duyệt báo giá', cls: 'badge-review' },
+  estimated: { label: 'Chờ duyệt báo giá', cls: 'badge-progress' },
   approved: { label: 'Đã duyệt', cls: 'badge-progress' },
   in_repair: { label: 'Đang sửa chữa', cls: 'badge-progress' },
   completed: { label: 'Hoàn thành', cls: 'badge-completed' },
   cancelled: { label: 'Đã hủy', cls: 'badge-cancelled' },
-  sent: { label: 'Đã gửi', cls: 'badge-review' },
+  sent: { label: 'Đã gửi', cls: 'badge-progress' },
   rejected: { label: 'Từ chối', cls: 'badge-cancelled' },
-  issued: { label: 'Đã phát hành', cls: 'badge-review' },
+  issued: { label: 'Đã phát hành', cls: 'badge-progress' },
   paid: { label: 'Đã thanh toán', cls: 'badge-completed' },
 };
 

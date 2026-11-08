@@ -112,7 +112,7 @@ export default function VehicleHistoryPage() {
             <tbody>
               {vehicles.map((v) => (
                 <tr key={v.id}>
-                  <td><span className="plate">{v.license_plate}</span></td>
+                  <td><strong>{v.license_plate}</strong></td>
                   <td>{v.brand} {v.model}</td>
                   <td>{v.customer_name}</td>
                   <td>{Number(v.job_count || 0)}</td>

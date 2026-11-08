@@ -3,13 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 
-const workflowIcons = [
-  <><path d="m4 12 1.5-4.2A2.5 2.5 0 0 1 7.9 6h8.2a2.5 2.5 0 0 1 2.4 1.8L20 12v6h-2v-2H6v2H4v-6Z" /><path d="M4 12h16M7 14h.01M17 14h.01" /></>,
-  <><rect x="6" y="3" width="12" height="18" rx="2" /><path d="M9 7h6M9 11h6M10 16h4M12 3v-1" /></>,
-  <><path d="M14.5 6.5a5 5 0 0 0-6.7 6.7L3 18l3 3 4.8-4.8a5 5 0 0 0 6.7-6.7l-3 3-3-3 3-3Z" /><path d="m5 19 1 1" /></>,
-  <><circle cx="12" cy="12" r="8.5" /><path d="m8.5 12 2.3 2.3 4.8-5" /><path d="M19 19l2 2" /></>,
-];
-
 export default function LoginPage() {
   const [isRegistering, setIsRegistering] = useState(false);
   const [email, setEmail] = useState('dung.receptionist@workshop.vn');
@@ -75,32 +68,25 @@ export default function LoginPage() {
           </p>
 
           <ol className="workflow-list">
-            <li aria-current="step">
-              <span className="workflow-marker" aria-hidden="true"><svg viewBox="0 0 24 24">{workflowIcons[0]}</svg><small>01</small></span>
+            <li>
+              <span className="workflow-number">01</span>
               <span className="workflow-copy">
                 <strong>Tiếp nhận xe</strong>
                 <small>Lưu thông tin xe và yêu cầu sửa chữa</small>
               </span>
             </li>
             <li>
-              <span className="workflow-marker" aria-hidden="true"><svg viewBox="0 0 24 24">{workflowIcons[1]}</svg><small>02</small></span>
+              <span className="workflow-number">02</span>
               <span className="workflow-copy">
                 <strong>Chẩn đoán & báo giá</strong>
                 <small>Phân công thợ và thống nhất hạng mục</small>
               </span>
             </li>
             <li>
-              <span className="workflow-marker" aria-hidden="true"><svg viewBox="0 0 24 24">{workflowIcons[2]}</svg><small>03</small></span>
+              <span className="workflow-number">03</span>
               <span className="workflow-copy">
-                <strong>Sửa chữa</strong>
-                <small>Theo dõi phụ tùng và tiến độ từng phiếu</small>
-              </span>
-            </li>
-            <li>
-              <span className="workflow-marker" aria-hidden="true"><svg viewBox="0 0 24 24">{workflowIcons[3]}</svg><small>04</small></span>
-              <span className="workflow-copy">
-                <strong>Bàn giao</strong>
-                <small>Hoàn tất phiếu và thanh toán</small>
+                <strong>Sửa chữa & bàn giao</strong>
+                <small>Theo dõi phụ tùng, tiến độ và thanh toán</small>
               </span>
             </li>
           </ol>
@@ -116,12 +102,6 @@ export default function LoginPage() {
             <strong>Garage Workshop</strong>
           </div>
 
-          <div className="login-console-status" role="status">
-            <span className="console-led" aria-hidden="true" />
-            <span>System ready</span>
-            <span className="console-divider" aria-hidden="true">/</span>
-            <span className="console-mode"><i aria-hidden="true" /> Diagnostic mode</span>
-          </div>
           <p className="eyebrow">Khu vực thành viên</p>
           <h2>{isRegistering ? 'Tạo tài khoản khách hàng' : 'Chào mừng trở lại'}</h2>
           <p className="login-intro">
@@ -222,17 +202,17 @@ export default function LoginPage() {
               <span className="demo-tag">Dùng thử</span>
             </div>
             <div className="demo-accounts">
-              <button type="button" className={`demo-account${email === 'dung.receptionist@workshop.vn' ? ' is-selected' : ''}`} aria-pressed={email === 'dung.receptionist@workshop.vn'} onClick={() => setQuickAccount('dung.receptionist@workshop.vn')}>
-                <span className="demo-led" aria-hidden="true" />Lễ tân · Dung
+              <button type="button" className="demo-account" onClick={() => setQuickAccount('dung.receptionist@workshop.vn')}>
+                Lễ tân · Dung
               </button>
-              <button type="button" className={`demo-account${email === 'hieu.mechanic@workshop.vn' ? ' is-selected' : ''}`} aria-pressed={email === 'hieu.mechanic@workshop.vn'} onClick={() => setQuickAccount('hieu.mechanic@workshop.vn')}>
-                <span className="demo-led" aria-hidden="true" />Thợ máy · Hiếu
+              <button type="button" className="demo-account" onClick={() => setQuickAccount('hieu.mechanic@workshop.vn')}>
+                Thợ máy · Hiếu
               </button>
-              <button type="button" className={`demo-account${email === 'minh.manager@workshop.vn' ? ' is-selected' : ''}`} aria-pressed={email === 'minh.manager@workshop.vn'} onClick={() => setQuickAccount('minh.manager@workshop.vn')}>
-                <span className="demo-led" aria-hidden="true" />Quản lý · Minh
+              <button type="button" className="demo-account" onClick={() => setQuickAccount('minh.manager@workshop.vn')}>
+                Quản lý · Minh
               </button>
-              <button type="button" className={`demo-account${email === 'admin@workshop.vn' ? ' is-selected' : ''}`} aria-pressed={email === 'admin@workshop.vn'} onClick={() => setQuickAccount('admin@workshop.vn')}>
-                <span className="demo-led" aria-hidden="true" />Quản trị viên
+              <button type="button" className="demo-account" onClick={() => setQuickAccount('admin@workshop.vn')}>
+                Quản trị viên
               </button>
             </div>
             <p className="demo-password">Mật khẩu demo: <strong>123456</strong></p>

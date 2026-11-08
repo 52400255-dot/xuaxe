@@ -7,21 +7,21 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  --charcoal: #202326;
-  --graphite: #30363A;
-  --warm-white: #F3F1EB;
-  --paper: #FBFAF6;
-  --steel-gray: #92999C;
-  --orange: #D96B32;
-  --orange-hover: #E57B42;
-  --orange-ink: #9A4417;
-  --muted-red: #B94A42;
-  --olive: #4F7A4B;
+  --charcoal: #242b2d;
+  --graphite: #354143;
+  --warm-white: #f6f5f1;
+  --paper: #fffefa;
+  --steel-gray: #899493;
+  --orange: #d78355;
+  --orange-hover: #e39b74;
+  --orange-ink: #8e4d2c;
+  --muted-red: #b85f59;
+  --olive: #5e8068;
   --text: var(--charcoal);
-  --text-secondary: #4A5154;
-  --text-dark-secondary: #C9CCCB;
-  --border: #C9C6BC;
-  --border-dark: #4A5154;
+  --text-secondary: #606a68;
+  --text-dark-secondary: #d1d6d3;
+  --border: #e7e4dc;
+  --border-dark: #465052;
   --sidebar: var(--charcoal);
   --space-1: 4px;
   --space-2: 8px;
@@ -47,11 +47,14 @@
   --font-size-login: 40px;
   --font-size-hero: clamp(40px, 4vw, 52px);
   --font-body: 'IBM Plex Sans', sans-serif;
-  --font-display: 'IBM Plex Sans Condensed', sans-serif;
+  --font-display: var(--font-body);
   --font-mono: 'IBM Plex Mono', monospace;
   --sidebar-width: 240px;
-  --radius: 3px;
-  --modal-shadow: 0 8px 24px color-mix(in srgb, var(--charcoal) 14%, transparent);
+  --radius: 12px;
+  --radius-card: 20px;
+  --shadow-card: 0 10px 28px rgba(36, 43, 45, .055);
+  --shadow-raised: 0 16px 38px rgba(36, 43, 45, .1);
+  --modal-shadow: 0 20px 60px rgba(36, 43, 45, .18);
 }
 
 * { box-sizing: border-box; }
@@ -708,4 +711,410 @@ dialog.modal-panel::backdrop { background: color-mix(in srgb, var(--charcoal) 60
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+
+/* Softer visual system */
+body {
+  background: var(--warm-white);
+}
+
+h1, h2, h3, h4 {
+  letter-spacing: -.025em;
+}
+
+.app-sidebar {
+  background: linear-gradient(180deg, #2c3739 0%, #222b2d 100%);
+  box-shadow: 8px 0 28px rgba(36, 43, 45, .08);
+}
+
+.brand-mark {
+  border-radius: 12px;
+  clip-path: none;
+}
+
+.sidebar-link {
+  border-left: 0;
+  border-radius: 12px;
+}
+
+.sidebar-link.is-active {
+  background: rgba(255, 255, 255, .1);
+  box-shadow: inset 3px 0 var(--orange);
+}
+
+.sidebar-logout {
+  color: var(--charcoal);
+  background: #f1bd9e;
+  border-color: #f1bd9e;
+  border-radius: 12px;
+  box-shadow: 0 5px 14px rgba(0, 0, 0, .12);
+  transition: transform .18s ease, background-color .18s ease, box-shadow .18s ease;
+}
+
+.sidebar-logout:hover:not(:disabled) {
+  color: var(--charcoal);
+  background: #f7c9ac;
+  border-color: #f7c9ac;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, .18);
+  transform: translateY(-1px);
+}
+
+.sidebar-logout-icon {
+  display: block;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+}
+
+.app-topbar {
+  background: rgba(255, 254, 250, .94);
+  border-bottom-color: rgba(93, 103, 100, .1);
+  box-shadow: 0 5px 18px rgba(36, 43, 45, .035);
+  backdrop-filter: blur(14px);
+}
+
+.app-main {
+  background: var(--warm-white);
+}
+
+.btn {
+  border-radius: 12px;
+  transition: transform .18s ease, color .18s ease, background-color .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+
+.btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.btn-primary {
+  box-shadow: 0 6px 16px rgba(192, 108, 65, .2);
+}
+
+.btn-primary:hover:not(:disabled) {
+  color: var(--charcoal);
+  box-shadow: 0 9px 20px rgba(192, 108, 65, .25);
+}
+
+.form-control, input:not([type='checkbox']):not([type='radio']), select, textarea {
+  min-height: 48px;
+  background: var(--paper);
+  border-color: #d9d8d0;
+  border-radius: 12px;
+  box-shadow: 0 2px 7px rgba(36, 43, 45, .025);
+  transition: border-color .18s ease, box-shadow .18s ease, background-color .18s ease;
+}
+
+.form-control:focus, input:not([type='checkbox']):not([type='radio']):focus, select:focus, textarea:focus {
+  background: #fff;
+  border-color: var(--orange);
+  outline: 3px solid color-mix(in srgb, var(--orange) 20%, transparent);
+  outline-offset: 1px;
+  box-shadow: 0 4px 14px rgba(36, 43, 45, .06);
+}
+
+.card, .legacy-panel, .warning-card {
+  background: var(--paper);
+  border-color: rgba(91, 101, 98, .12);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+}
+
+.table-card, .dashboard-table-card, .repair-queue-card, .portal-vehicle-card {
+  overflow: hidden;
+  border-radius: var(--radius-card);
+}
+
+.alert, .stock-alert-panel, .estimate-job-context, .import-part-summary {
+  border-radius: 14px;
+}
+
+.modal-panel, .dialog-role-change {
+  border: 1px solid rgba(91, 101, 98, .14);
+  border-radius: 22px;
+  box-shadow: var(--modal-shadow);
+}
+
+.modal-header, .modal-actions {
+  border-color: rgba(91, 101, 98, .12);
+}
+
+.table-wrapper {
+  border-radius: 14px;
+}
+
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+th, td {
+  border-bottom-color: rgba(91, 101, 98, .1);
+}
+
+thead th {
+  border-bottom: 1px solid rgba(91, 101, 98, .14);
+}
+
+tbody tr:hover td {
+  background: #f8f6f1;
+}
+
+.record-count, .plate {
+  border-radius: 10px;
+}
+
+.badge::before, .status-dot, .task-status-breakdown i {
+  border-radius: 999px;
+}
+
+.dashboard-welcome {
+  min-height: 148px;
+  padding: 28px 30px;
+  background: linear-gradient(120deg, #2c3839, #394849);
+  border: 0;
+  border-radius: 22px;
+  box-shadow: 0 14px 34px rgba(36, 43, 45, .12);
+}
+
+.dashboard-welcome-kicker {
+  color: #e8b797;
+}
+
+.dashboard-stats, .dashboard-stats-four, .repair-overview-cards, .task-board-metrics {
+  gap: 12px;
+  margin: 0 0 24px;
+  border: 0;
+}
+
+.stat-card, .dashboard-stats-four .stat-card, .repair-overview-cards > article, .task-metric-card {
+  min-height: 120px;
+  padding: 18px;
+  background: var(--paper);
+  border: 1px solid rgba(91, 101, 98, .12);
+  border-radius: 16px;
+  box-shadow: var(--shadow-card);
+}
+
+.stat-card:nth-child(n), .repair-overview-cards > article:nth-child(n), .task-metric-card:nth-child(n) {
+  border-right: 1px solid rgba(91, 101, 98, .12);
+  border-bottom: 1px solid rgba(91, 101, 98, .12);
+}
+
+.dashboard-content-grid {
+  gap: 18px;
+}
+
+.dashboard-side-stack, .task-board-aside {
+  gap: 18px;
+}
+
+.dashboard-stock-list li, .task-used-parts-list li {
+  padding: 11px 12px;
+  background: #f8f6f1;
+  border: 0;
+  border-radius: 12px;
+}
+
+.dashboard-stock-link {
+  padding-top: 12px;
+  border-top-color: rgba(91, 101, 98, .1);
+}
+
+.reception-stepper {
+  gap: 10px;
+  padding: 10px;
+  background: transparent;
+  border: 0;
+}
+
+.reception-step {
+  padding: 10px 12px;
+  background: var(--paper);
+  border: 1px solid rgba(91, 101, 98, .1);
+  border-radius: 14px;
+}
+
+.reception-step > span, .step-number {
+  border-radius: 50%;
+}
+
+.reception-stepper > i {
+  background: #e2ddd3;
+}
+
+.service-picker, .estimate-part-picker {
+  padding: 8px;
+  background: #f8f6f1;
+  border: 1px solid rgba(91, 101, 98, .1);
+  border-radius: 14px;
+}
+
+.service-option, .estimate-part-row {
+  padding: 10px;
+  border: 0;
+  border-radius: 10px;
+}
+
+.reception-service-option.is-selected {
+  border-radius: 12px;
+}
+
+.reception-panel-heading, .reception-summary-heading, .portal-vehicle-heading {
+  border-bottom-color: rgba(91, 101, 98, .1);
+}
+
+.reception-summary-section, .reception-estimate-total, .portal-estimate-total {
+  border-color: rgba(91, 101, 98, .1);
+}
+
+.repair-overview-cards {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.repair-queue-toolbar {
+  border-bottom-color: rgba(91, 101, 98, .1);
+}
+
+.repair-status-tab, .filter-tab {
+  padding: 8px 14px;
+  background: #f3f1eb;
+  border: 1px solid transparent;
+  border-radius: 999px;
+}
+
+.repair-status-tab:hover, .filter-tab:hover {
+  background: #ece9e1;
+}
+
+.repair-status-tab.is-active, .filter-tab.is-active {
+  color: var(--charcoal);
+  background: #f7e7db;
+  border-color: #efd0bc;
+}
+
+.filter-tabs {
+  gap: 8px;
+  border: 0;
+}
+
+.repair-search {
+  background: var(--paper);
+  border-color: #d9d8d0;
+  border-radius: 12px;
+}
+
+.task-list {
+  gap: 12px;
+}
+
+.job-card {
+  padding: 20px;
+  background: var(--paper);
+  border: 1px solid rgba(91, 101, 98, .12);
+  border-radius: 18px;
+  box-shadow: var(--shadow-card);
+}
+
+.job-card:first-child {
+  border-top: 1px solid rgba(91, 101, 98, .12);
+}
+
+.job-detail-block {
+  padding: 12px;
+  background: #f8f6f1;
+  border: 0;
+  border-radius: 12px;
+}
+
+.dashboard-progress-track, .task-progress-track, .work-progress-bars span {
+  border-radius: 999px;
+}
+
+.login-showcase {
+  border-radius: 0 28px 28px 0;
+  background: linear-gradient(145deg, #252e30, #303b3d);
+}
+
+.workflow-list {
+  gap: 9px;
+  border: 0;
+}
+
+.workflow-list li {
+  gap: 8px;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, .045);
+  border: 1px solid rgba(255, 255, 255, .065);
+  border-radius: 14px;
+}
+
+.login-panel-wrap {
+  border-left: 0;
+  background: radial-gradient(ellipse at 78% 25%, rgba(215, 131, 85, .08), transparent 52%);
+}
+
+.login-panel {
+  padding: 34px;
+  background: var(--paper);
+  border: 1px solid rgba(91, 101, 98, .1);
+  border-radius: 24px;
+  box-shadow: var(--shadow-raised);
+}
+
+.login-panel .eyebrow {
+  color: var(--orange-ink);
+}
+
+.demo-access {
+  border-top-color: rgba(91, 101, 98, .12);
+}
+
+.demo-account {
+  background: #f8f6f1;
+  border-color: rgba(91, 101, 98, .16);
+  border-radius: 11px;
+  transition: transform .18s ease, background-color .18s ease, border-color .18s ease;
+}
+
+.demo-account:hover {
+  background: #f4ece4;
+  border-color: #d9b59c;
+  transform: translateY(-1px);
+}
+
+.menu-toggle, .user-avatar {
+  border-radius: 12px;
+}
+
+@media (max-width: 900px) {
+  .login-showcase {
+    border-radius: 0 0 24px 24px;
+  }
+
+  .login-panel-wrap {
+    min-height: 0;
+    padding: 36px 24px;
+  }
+}
+
+@media (max-width: 767px) {
+  .repair-overview-cards {
+    gap: 10px;
+  }
+
+  .job-card {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 520px) {
+  .login-panel {
+    padding: 22px 18px;
+    border-radius: 20px;
+  }
+
+  .dashboard-welcome {
+    padding: 20px;
+    border-radius: 18px;
+  }
 }
